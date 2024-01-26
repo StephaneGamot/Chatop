@@ -1,7 +1,6 @@
 package com.chatop.backend.configuration;
 
 import javax.crypto.spec.SecretKeySpec;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -19,11 +18,15 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 @Configuration
 public class SpringSecurityConfig {
 
-    private String jwtKey = "toupdate.....";
+    private final String jwtKey = Base64.getEncoder().encodeToString(SecureRandom.getSeed(32)); // 32 bytes = 256 bits
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
@@ -40,7 +43,7 @@ public class SpringSecurityConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKey = new SecretKeySpec(this.jwtKey.getBytes(), 0, this.jwtKey.getBytes().length, "RSA");
+        SecretKeySpec secretKey = new SecretKeySpec(this.jwtKey.getBytes(), "HmacSHA256");
         return NimbusJwtDecoder.withSecretKey(secretKey).macAlgorithm(MacAlgorithm.HS256).build();
     }
 
@@ -55,5 +58,4 @@ public class SpringSecurityConfig {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
