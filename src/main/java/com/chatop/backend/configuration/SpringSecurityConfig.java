@@ -26,12 +26,13 @@ public class SpringSecurityConfig {
 
     private final String jwtKey = Base64.getEncoder().encodeToString(SecureRandom.getSeed(32)); // 32 bytes = 256 bits
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/register").permitAll() // Autoriser l'accès à /register pour tous
+                        .anyRequest().authenticated()) // Toutes les autres requêtes nécessitent une authentification
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .httpBasic(Customizer.withDefaults()).build();
     }

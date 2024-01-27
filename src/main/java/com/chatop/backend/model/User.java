@@ -32,4 +32,6 @@ public class User {
 
     @Column(name = "updated_at")
     private Date updatedAt;
+
+
 }
