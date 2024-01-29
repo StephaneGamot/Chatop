@@ -1,6 +1,7 @@
 package com.chatop.backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -19,12 +20,15 @@ public class User {
     private Long id;                        // Correspond à `id` dans la table USERS.
 
     @Column(name = "email", length = 255)   // Mappe ce champ à la colonne `email`
+    @NotNull(message = "Email ne peut pas être null")
     private String email;
 
     @Column(name = "name", length = 255)
+    @NotNull(message = "Nom ne peut pas être null")
     private String name;
 
     @Column(name = "password", length = 255)
+    @NotNull(message = "Mot de passe ne peut pas être null")
     private String password;
 
     @Column(name = "created_at")            // L'attribut name dans l'annotation @Column spécifie explicitement le nom de la colonne dans la BDE.

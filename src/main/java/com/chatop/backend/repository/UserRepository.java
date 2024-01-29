@@ -4,9 +4,12 @@ import com.chatop.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    public  User findByName(String name);   // La mise en œuvre est automatiquement gérée par Spring Data JPA selon la convention de nommage.
+    public  User findByName(String name);
+    Optional<User> findByEmail(String email);
 }
 
 
