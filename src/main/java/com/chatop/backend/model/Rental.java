@@ -31,11 +31,11 @@ public class Rental {
     @Column(name = "picture", length = 255)
     private String picture;
 
-    @Column(name = "description", length = 2000)
+    @Column(name = "description", length = 5000)
     private String description;
 
     @ManyToOne                               // Indique une relation plusieurs-à-un avec la table USERS. c'est le FOREIGN KEY
-    @JoinColumn(name = "owner_id", referencedColumnName = "id", nullable = false) // Définit la colonne de jointure.
+    @JoinColumn(name = "owner_id") // Définit la colonne de jointure. //, referencedColumnName = "id", nullable = false
     private User owner;                    // owner Id est un objet de User
 
     @Column(name = "created_at")
@@ -46,13 +46,4 @@ public class Rental {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = new Date();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = new Date();
-    }
 }

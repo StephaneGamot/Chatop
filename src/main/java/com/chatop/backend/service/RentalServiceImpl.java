@@ -62,15 +62,15 @@ public class RentalServiceImpl implements RentalService {
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
         // Obtenez l'email à partir de principal
-        String email = principal.getName();
-        logger.info("Tentative de création d'une location pour l'email: {}", email);
+        String username = principal.getName();
+        logger.info("Tentative de création d'une location pour le nom d'utilisateur: {}", username);
 
         User owner;
         try {
-            owner = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec l'email: " + email));
+            owner = userRepository.findByName(username)
+                    .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec le nom d'utilisateur: " + username));
         } catch (EntityNotFoundException ex) {
-            logger.error("Erreur lors de la récupération de l'utilisateur avec l'email {}", email, ex);
+            logger.error("Erreur lors de la récupération de l'utilisateur avec le nom d'utilisateur {}", username, ex);
             throw ex;
         }
 

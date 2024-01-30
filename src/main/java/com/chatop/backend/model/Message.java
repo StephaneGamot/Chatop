@@ -30,10 +30,10 @@ public class Message {
     private Date updatedAt;
 
     @ManyToOne                                                 // Indique une relation plusieurs-à-un avec la table USERS.
-    @JoinColumn(name = "user_id", referencedColumnName = "id") // Définit la colonne de jointure et la référence. car nous avons une FOREIGN KEY
+    @JoinColumn(name = "user_id") // Définit la colonne de jointure et la référence. car nous avons une FOREIGN KEY
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "rental_id", referencedColumnName = "id") // Définit la colonne de jointure et la référence.
+    @JoinColumn(name = "rental_id") // Définit la colonne de jointure et la référence. //, referencedColumnName = "id"
     private Rental rental;
 }
