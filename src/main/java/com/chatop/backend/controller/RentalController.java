@@ -4,6 +4,7 @@ import com.chatop.backend.dto.RentalDto;
 import com.chatop.backend.dto.RentalRequestDTO;
 import com.chatop.backend.model.Rental;
 import com.chatop.backend.service.RentalService;
+import com.chatop.backend.service.RentalServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,7 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ModelAttribute;
-
+import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
@@ -65,23 +66,28 @@ public class RentalController {
             @ApiResponse(responseCode = "200", description = "Nouvelle location créée avec succès"),
             @ApiResponse(responseCode = "400", description = "Probleme dans la requete lors de la création d'une nouvelle location"),
     })
-    @PostMapping( "/rentals")
-    public ResponseEntity<?> createRental(@ModelAttribute RentalRequestDTO rentalRequestDTO, Principal principal) {
+    @PostMapping
+    public ResponseEntity<?> createRental(@RequestParam("name") String name,
+                                          @RequestParam("surface") int surface,
+                                          @RequestParam("price") int price,
+                                          @RequestParam("picture") MultipartFile picture,
+                                          @RequestParam("description") String description,
+                                          @RequestParam("owner_id") Long owner_id) {
         try {
-            RentalDto createdRental = rentalService.createRental(rentalRequestDTO, principal);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdRental);
+            RentalDto rentalDto = rentalService.createRental(name, surface, price, picture, description, owner_id);
+            return new ResponseEntity<>(rentalDto, HttpStatus.CREATED);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while creating rental: " + e.getMessage());
+            // Gérer l'exception...
         }
-    }
-
+        return null;
+    }}
 
     @Operation(summary = "Mettre à jour d'une location", description = "Mise à jour les détails d'une location existante")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Succès de la mise à jour de 'Location'"),
             @ApiResponse(responseCode = "404", description = "Mise à jour de 'Location' non trouvée")
     })
-    @PutMapping("/{id}")
+    @PutMapping("/rentals/{id}")
     public ResponseEntity<RentalDto> updateRental(@PathVariable Long id, @RequestBody RentalRequestDTO rentalRequestDTO) {
         try {
             RentalDto updatedRental = rentalService.updateRental(id, rentalRequestDTO);
@@ -92,4 +98,4 @@ public class RentalController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-    }
+

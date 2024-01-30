@@ -11,7 +11,7 @@ import java.util.List;
 public interface RentalService {
     List<RentalDto> getAllRentals();
     Rental getRentalById(Long id);
-    RentalDto createRental(RentalRequestDTO rentalRequestDTO, Principal principal) throws IOException;
+    RentalDto createRental(String name, int surface, int price, MultipartFile picture, String description, Long owner_id) throws IOException;
     RentalDto updateRental(Long id, RentalRequestDTO rentalRequestDTO) throws IOException;
 }
 
