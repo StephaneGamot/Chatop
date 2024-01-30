@@ -12,6 +12,6 @@ public interface RentalService {
     List<RentalDto> getAllRentals();
     Rental getRentalById(Long id);
     RentalDto createRental(RentalRequestDTO rentalRequestDTO, Principal principal) throws IOException;
-    Rental updateRental(Long id, Rental rental);
+    RentalDto updateRental(Long id, RentalRequestDTO rentalRequestDTO) throws IOException;
 }
 

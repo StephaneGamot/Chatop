@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
@@ -76,17 +77,19 @@ public class RentalController {
 
 
     @Operation(summary = "Mettre à jour d'une location", description = "Mise à jour les détails d'une location existante")
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "200", description = "Succès de la mise à jour de 'Location'"),
-                @ApiResponse(responseCode = "404", description = "Mise à jour de 'Location' non trouvée")
-        })
-        @PutMapping("/rentals/{id}")
-        public ResponseEntity<Rental> updateRental (@PathVariable Long id, @RequestBody Rental rental){
-            try {
-                Rental updatedRental = rentalService.updateRental(id, rental);
-                return ResponseEntity.ok(updatedRental);
-            } catch (EntityNotFoundException e) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Succès de la mise à jour de 'Location'"),
+            @ApiResponse(responseCode = "404", description = "Mise à jour de 'Location' non trouvée")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<RentalDto> updateRental(@PathVariable Long id, @RequestBody RentalRequestDTO rentalRequestDTO) {
+        try {
+            RentalDto updatedRental = rentalService.updateRental(id, rentalRequestDTO);
+            return ResponseEntity.ok(updatedRental);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
     }

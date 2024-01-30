@@ -61,7 +61,6 @@ public class RentalServiceImpl implements RentalService {
         // Logger pour la journalisation
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
-        // Obtenez l'email à partir de principal
         String username = principal.getName();
         logger.info("Tentative de création d'une location pour le nom d'utilisateur: {}", username);
 
@@ -107,14 +106,40 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public Rental updateRental(Long id, Rental rentalDetails) {
-        return rentalRepository.findById(id).map(existingRental -> {
-            existingRental.setName(rentalDetails.getName());
-            existingRental.setSurface(rentalDetails.getSurface());   // Répétez pour les autres champs
-            existingRental.setPrice(rentalDetails.getPrice());
-            existingRental.setPicture(rentalDetails.getPicture());
-            existingRental.setDescription(rentalDetails.getDescription());
-            return rentalRepository.save(existingRental);
-        }).orElseThrow(() -> new EntityNotFoundException("Rental not found with id: " + id));
+    public RentalDto updateRental(Long id, RentalRequestDTO rentalRequestDTO) throws IOException {
+        Logger logger = LoggerFactory.getLogger(this.getClass());
+
+        // Rechercher le Rental existant par son ID
+        Rental rental = rentalRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Location non trouvée avec l'id: " + id));
+
+        // Mise à jour des propriétés de l'objet Rental
+        rental.setName(rentalRequestDTO.getName());
+        rental.setSurface(rentalRequestDTO.getSurface());
+        rental.setPrice(rentalRequestDTO.getPrice());
+        rental.setDescription(rentalRequestDTO.getDescription());
+
+        // Mise à jour de l'image si nécessaire
+        if (rentalRequestDTO.getPicture() != null && !rentalRequestDTO.getPicture().isEmpty()) {
+            String fileName = StringUtils.cleanPath(Objects.requireNonNull(rentalRequestDTO.getPicture().getOriginalFilename()));
+            Path path = Paths.get("/img" + fileName);
+            Files.copy(rentalRequestDTO.getPicture().getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            rental.setPicture(path.toString());
+        }
+
+        // Enregistrement des modifications
+        try {
+            rental = rentalRepository.save(rental);
+        } catch (Exception ex) {
+            logger.error("Erreur lors de la mise à jour de la location", ex);
+            throw ex;
+        }
+
+        // Conversion en DTO pour le retour
+        RentalDto rentalDto = new RentalDto();
+        BeanUtils.copyProperties(rental, rentalDto);
+        rentalDto.setOwnerId(rental.getOwner().getId());
+
+        return rentalDto;
     }
 }
