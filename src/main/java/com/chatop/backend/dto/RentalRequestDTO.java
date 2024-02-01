@@ -17,7 +17,7 @@ public class RentalRequestDTO {
     @Positive(message = "Price must be positive")
     private Integer price;
 
-    private MultipartFile picture;
+    private String picture;
     private String description;
 
     @NotNull(message = "Owner ID cannot be null")

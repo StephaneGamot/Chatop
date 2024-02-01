@@ -31,9 +31,9 @@ public class Message {
 
     @ManyToOne                                                 // Indique une relation plusieurs-à-un avec la table USERS.
     @JoinColumn(name = "user_id") // Définit la colonne de jointure et la référence. car nous avons une FOREIGN KEY
-    private User user;
+    private User userId;
 
     @ManyToOne
     @JoinColumn(name = "rental_id") // Définit la colonne de jointure et la référence. //, referencedColumnName = "id"
-    private Rental rental;
+    private Rental rentalId;
 }

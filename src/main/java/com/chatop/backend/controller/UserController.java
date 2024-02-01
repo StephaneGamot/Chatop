@@ -1,6 +1,6 @@
 package com.chatop.backend.controller;
 
-import com.chatop.backend.model.User;
+import com.chatop.backend.dto.UserDto;
 import com.chatop.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 
 @RestController
@@ -30,8 +29,8 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Utilisateur non trouvé")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.findUserById(id);
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+        UserDto user = userService.findUserById(id);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
@@ -45,8 +44,8 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Vous n'avez pas accès à la liste des utilisateurs")
     })
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.findAllUsers();
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<UserDto> users = userService.findAllUsers();
         return ResponseEntity.ok(users);
     }
 }

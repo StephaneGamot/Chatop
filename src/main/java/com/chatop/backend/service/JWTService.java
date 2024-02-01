@@ -1,6 +1,7 @@
 package com.chatop.backend.service;
 
-import com.chatop.backend.model.User;
+import com.chatop.backend.dto.UserDto;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import org.springframework.security.core.Authentication;
@@ -25,18 +26,18 @@ public class JWTService {
         return encodeToken(claims);
     }
 
-    public String generateTokenForUser(User user) {
-        JwtClaimsSet claims = buildClaims(user.getName());
+    public String generateTokenForUser(UserDto user) {
+        JwtClaimsSet claims = buildClaims(user.getEmail());
         return encodeToken(claims);
     }
 
-    private JwtClaimsSet buildClaims(String subject) {
+    private JwtClaimsSet buildClaims(String email) {
         Instant now = Instant.now();
         return JwtClaimsSet.builder()
                 .issuer("self")
                 .issuedAt(now)
                 .expiresAt(now.plus(1, ChronoUnit.DAYS))
-                .subject(subject)
+                .subject(email)
                 .build();
     }
 

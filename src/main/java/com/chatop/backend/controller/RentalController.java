@@ -5,20 +5,34 @@ import com.chatop.backend.dto.RentalRequestDTO;
 import com.chatop.backend.model.Rental;
 import com.chatop.backend.service.RentalService;
 import com.chatop.backend.service.RentalServiceImpl;
+import com.chatop.backend.service.UploadFileService;
+import com.chatop.backend.exception.ErrorResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+//import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.NoSuchElementException;
+
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -26,10 +40,14 @@ import java.util.List;
 public class RentalController {
 
     private final RentalService rentalService;
+    private final UploadFileService fileUpload;
+    private final Logger logger = LoggerFactory.getLogger(RentalController.class);
+
 
     @Autowired
-    public RentalController(RentalService rentalService) {
+    public RentalController(RentalService rentalService, UploadFileService fileUpload) {
         this.rentalService = rentalService;
+        this.fileUpload = fileUpload;
     }
 
     @Operation(summary = "Récupération de toutes les locations", description = "Retourne une liste de toutes les locations")
@@ -63,24 +81,38 @@ public class RentalController {
 
     @Operation(summary = "Création d'une nouvelle location", description = "Création d'une nouvelle location et la retourne")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Nouvelle location créée avec succès"),
+            @ApiResponse(responseCode = "201", description = "Nouvelle location créée avec succès"),
             @ApiResponse(responseCode = "400", description = "Probleme dans la requete lors de la création d'une nouvelle location"),
     })
-    @PostMapping
-    public ResponseEntity<?> createRental(@RequestParam("name") String name,
-                                          @RequestParam("surface") int surface,
-                                          @RequestParam("price") int price,
-                                          @RequestParam("picture") MultipartFile picture,
-                                          @RequestParam("description") String description,
-                                          @RequestParam("owner_id") Long owner_id) {
-        try {
-            RentalDto rentalDto = rentalService.createRental(name, surface, price, picture, description, owner_id);
-            return new ResponseEntity<>(rentalDto, HttpStatus.CREATED);
-        } catch (Exception e) {
-            // Gérer l'exception...
+    @PostMapping("/rentals")
+    public ResponseEntity<?> createRental(
+            @Valid @RequestParam("name") String name,
+            @Valid @RequestParam("surface") int surface,
+            @Valid @RequestParam("price") int price,
+            @Valid @RequestParam("picture") MultipartFile picture,
+            @Valid @RequestParam("description") String description,
+            @Valid Long owner_id) throws IOException {
+        if (picture.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Le fichier est vide encore !.");
         }
-        return null;
-    }}
+        try {
+            String pictureUrl = fileUpload.uploadFile(String.valueOf(picture));
+            RentalDto rentalDto = rentalService.createRental(name, surface, price, pictureUrl, description, owner_id);
+            return new ResponseEntity<>(rentalDto, HttpStatus.CREATED);
+        }  catch (EntityNotFoundException ex) {
+            logger.error("Entity not found", ex);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé avec l'ID: " + owner_id);
+        }
+        catch (IOException ex) {
+            logger.error("An error occurred while uploading the picture.", ex);
+            ErrorResponse errorResponse = new ErrorResponse("File upload error",
+                    Collections.singletonList("An error occurred while uploading the picture."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        } catch (Exception e) {
+            logger.error("Erreur lors de la création de la location", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur lors de la création de la location");
+        }
+    }
 
     @Operation(summary = "Mettre à jour d'une location", description = "Mise à jour les détails d'une location existante")
     @ApiResponses(value = {
@@ -90,12 +122,12 @@ public class RentalController {
     @PutMapping("/rentals/{id}")
     public ResponseEntity<RentalDto> updateRental(@PathVariable Long id, @RequestBody RentalRequestDTO rentalRequestDTO) {
         try {
-            RentalDto updatedRental = rentalService.updateRental(id, rentalRequestDTO);
-            return ResponseEntity.ok(updatedRental);
+            return ResponseEntity.ok(rentalService.updateRental(id, rentalRequestDTO));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
+}
 

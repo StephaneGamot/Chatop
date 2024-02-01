@@ -1,6 +1,8 @@
 package com.chatop.backend.configuration;
 
 import javax.crypto.spec.SecretKeySpec;
+
+import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -31,7 +33,7 @@ public class SpringSecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register","/api/rentals","/swagger-ui/**", "/v3/api-docs/**").permitAll() // Autoriser l'accès à /register pour tous
+                        .requestMatchers("/api/auth/register","/swagger-ui/**", "/v3/api-docs/**").permitAll() // Autoriser l'accès à /register pour tous
                         .anyRequest().authenticated()) // Toutes les autres requêtes nécessitent une authentification
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .httpBasic(Customizer.withDefaults()).build();
@@ -49,16 +51,9 @@ public class SpringSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService users() {
-        UserDetails user = User.builder()
-                .username("test2@example.com")  // Utilisez une adresse email ici comme nom d'utilisateur
-                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(user);
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
-
-
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
