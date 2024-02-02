@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
@@ -25,15 +26,14 @@ public class UploadFileServiceImpl implements UploadFileService {
     }
 
     @Override
-    public String uploadFile(String multipartFile) throws IOException {
-        if (multipartFile == null || multipartFile.isEmpty()) {
+    public String uploadFile(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
             throw new IOException("Le fichier est vide ou manquant.");
         }
 
-        Map uploadResult = cloudinary.uploader()
-                .upload(multipartFile.getBytes(), Map.of("public_id", UUID.randomUUID().toString()));
-
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), Map.of("public_id", UUID.randomUUID().toString()));
         return uploadResult.get("url").toString();
     }
+
 }
 

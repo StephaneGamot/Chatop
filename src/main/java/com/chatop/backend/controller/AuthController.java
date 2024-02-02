@@ -6,12 +6,15 @@ import com.chatop.backend.repository.UserRepository;
 import com.chatop.backend.service.UserService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import com.chatop.backend.service.JWTService;
@@ -23,15 +26,12 @@ import java.util.Optional;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final JWTService jwtService;
-    private final UserService userService;
-    private final ModelMapper modelMapper;
+    @Autowired
+    private JWTService jwtService;
 
-    public AuthController(JWTService jwtService, UserService userService, ModelMapper modelMapper) {
-        this.jwtService = jwtService;
-        this.userService = userService;
-        this.modelMapper = modelMapper;
-    }
+    @Autowired
+    private UserService userService;
+
 
     @Operation(summary = "Inscription d'un nouvel utilisateur", description = "Crée un nouvel utilisateur et retourne un token JWT")
     @ApiResponses(value = {
@@ -41,14 +41,14 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Erreur provenant du serveur")
     })
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        if (userService.findByEmail(user.getName()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Nom d'utilisateur déjà utilisé");
+    public ResponseEntity<?> register(@RequestBody @Valid User user) {
+        UserDto savedUserDto = userService.registerUser(user);
+        if (savedUserDto == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email déjà utilisé");
         }
-        UserDto savedUser = userService.registerUser(user);
-        String token = jwtService.generateTokenForUser(savedUser);
-
-        return ResponseEntity.ok().body(token);
+        String token = jwtService.generateTokenForUser(savedUserDto);
+        savedUserDto.setToken(token);
+        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, "Bearer " + token).body(savedUserDto);
     }
 
     @Operation(summary = "Connexion utilisateur", description = "Authentifie un utilisateur et retourne un token JWT")
@@ -59,11 +59,11 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<String> login(Authentication authentication) {
-        if (authentication.isAuthenticated()) {
-            return ResponseEntity.ok(jwtService.generateToken(authentication));
-        } else {
+        if (!authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        String token = jwtService.generateToken(authentication);
+        return ResponseEntity.ok(token);
     }
 
     @Operation(summary = "Obtention des informations de l'utilisateur", description = "Retourne les informations de l'utilisateur actuellement authentifié")
@@ -74,18 +74,32 @@ public class AuthController {
     })
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié");
         }
 
-        String username = authentication.getName().toLowerCase(); // Convertir en minuscules si nécessaire
-        Optional<User> userOpt = userService.findByEmail(username);
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
+        // Supposons que l'identifiant unique est l'email de l'utilisateur
+        String email = ((UserDetails) authentication.getPrincipal()).getUsername();
+        try {
+            Optional<User> userOpt = userService.findByEmail(email);
+
+            if (!userOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé");
+            }
+
+            // Convertissez l'entité User en UserDto (ou tout autre objet DTO que vous souhaitez renvoyer)
+            UserDto userDto = convertToDTO(userOpt.get());
+
+            return ResponseEntity.ok(userDto);
+        } catch (Exception e) {
+            // Loggez l'erreur si nécessaire
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur est survenue lors de la récupération des informations de l'utilisateur");
         }
-        User user = userOpt.get();
-        UserDto userDto = modelMapper.map(user, UserDto.class); // Utiliser ModelMapper pour la cohérence
-        return ResponseEntity.ok(userDto);
+    }
+
+    private UserDto convertToDTO(User user) {
+        ModelMapper modelMapper = new ModelMapper();
+        return modelMapper.map(user, UserDto.class);
     }
 
 

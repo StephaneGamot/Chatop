@@ -31,13 +31,14 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class RentalServiceImpl implements RentalService {
     private final RentalRepository rentalRepository;
-    private final UploadFileService uploadFileService; // Ajout de cette dépendance
+    @Autowired
+    private UploadFileService fileUpload;
+
     private final UserService userService;
 
     @Autowired
     public RentalServiceImpl(RentalRepository rentalRepository, UploadFileService uploadFileService, UserService userService) {
         this.rentalRepository = rentalRepository;
-        this.uploadFileService = uploadFileService; // Initialisation de la dépendance
         this.userService = userService;
     }
     private static final Logger logger = LoggerFactory.getLogger(RentalServiceImpl.class);
@@ -107,8 +108,8 @@ public class RentalServiceImpl implements RentalService {
 
         // Gestion de l'image si nécessaire
         if (rentalRequestDTO.getPicture() != null && !rentalRequestDTO.getPicture().isEmpty()) {
-            String imageUrl = uploadFileService.uploadFile(rentalRequestDTO.getPicture());
-            rental.setPicture(imageUrl);
+            String pictureUrl = String.valueOf(rentalRequestDTO.getPicture()); // Si c'est déjà une URL
+            rental.setPicture(pictureUrl);
         }
 
         rental = rentalRepository.save(rental);

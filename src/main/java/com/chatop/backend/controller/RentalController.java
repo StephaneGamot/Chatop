@@ -96,17 +96,17 @@ public class RentalController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Le fichier est vide encore !.");
         }
         try {
-            String pictureUrl = fileUpload.uploadFile(String.valueOf(picture));
+            String pictureUrl = fileUpload.uploadFile(picture);
             RentalDto rentalDto = rentalService.createRental(name, surface, price, pictureUrl, description, owner_id);
             return new ResponseEntity<>(rentalDto, HttpStatus.CREATED);
         }  catch (EntityNotFoundException ex) {
-            logger.error("Entity not found", ex);
+            logger.error("Entité non trouvée", ex);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Utilisateur non trouvé avec l'ID: " + owner_id);
         }
         catch (IOException ex) {
-            logger.error("An error occurred while uploading the picture.", ex);
-            ErrorResponse errorResponse = new ErrorResponse("File upload error",
-                    Collections.singletonList("An error occurred while uploading the picture."));
+            logger.error("Une erreur s'est produite lors du téléchargement de l'image", ex);
+            ErrorResponse errorResponse = new ErrorResponse("Erreur de téléchargement de fichier",
+                    Collections.singletonList("Une erreur s'est produite lors du téléchargement de l'image"));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         } catch (Exception e) {
             logger.error("Erreur lors de la création de la location", e);

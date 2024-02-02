@@ -16,4 +16,5 @@ public class UserDto {
     //private String password;
     private Date createdAt;
     private Date updatedAt;
+    private String token;
 }

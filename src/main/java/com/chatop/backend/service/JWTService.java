@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JWTService {
 
-    private JwtEncoder jwtEncoder;
+    private final JwtEncoder jwtEncoder;
 
     public JWTService(JwtEncoder jwtEncoder) {
         this.jwtEncoder = jwtEncoder;
