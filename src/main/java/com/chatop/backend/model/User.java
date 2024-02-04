@@ -19,22 +19,24 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Configure la génération automatique de la clé.
     private Long id;                        // Correspond à `id` dans la table USERS.
 
-    @Column(name = "email", length = 255)   // Mappe ce champ à la colonne `email`
+    @Column(name = "email", unique = true)   // Mappe ce champ à la colonne `email`
     @NotNull(message = "Email ne peut pas être null")
     private String email;
 
-    @Column(name = "name", length = 255)
+    @Column(name = "name")
     @NotNull(message = "Nom ne peut pas être null")
     private String name;
 
-    @Column(name = "password", length = 255)
+    @Column(name = "password")
     @NotNull(message = "Mot de passe ne peut pas être null")
     private String password;
 
     @Column(name = "created_at")            // L'attribut name dans l'annotation @Column spécifie explicitement le nom de la colonne dans la BDE.
+    @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;                 // le champ Java createdAt doit être mappé à la colonne nommée created_at dans la table de base de données. On se doit de respecter ici le CamelCase
 
     @Column(name = "updated_at")
+    @Temporal(TemporalType.TIMESTAMP)
     private Date updatedAt;
 
     @PrePersist
