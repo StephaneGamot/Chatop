@@ -12,6 +12,6 @@ public class UserDto {
     private Long id;
     private String email;
     private String name;
-    private Date createdAt;
-    private Date updatedAt;
+    private Date created_at;
+    private Date updated_at;
 }

@@ -39,8 +39,8 @@ public class MessageServiceImpl implements MessageService {
         message.setMessage(messageDto.getMessage());
         message.setUser(user);
         message.setRental(rental);
-        message.setCreatedAt(new Date());
-        message.setUpdatedAt(new Date());
+        message.setCreated_at(new Date());
+        message.setUpdated_at(new Date());
 
         messageRepository.save(message);
     }

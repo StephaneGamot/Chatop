@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     private AuthenticationManager authenticationManager;
 
     private UserDto convertToUserDto(User user) {
-        return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getCreatedAt(), user.getUpdatedAt());
+        return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getCreated_at(), user.getUpdated_at());
     }
 
     @Override
@@ -53,8 +53,8 @@ public class UserServiceImpl implements UserService {
         user.setEmail(registerDto.getEmail());
         user.setName(registerDto.getName());
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-        user.setCreatedAt(new Date());
-        user.setUpdatedAt(new Date());
+        user.setCreated_at(new Date());
+        user.setUpdated_at(new Date());
         User savedUser = userRepository.save(user);
 
         return convertToUserDto(savedUser);

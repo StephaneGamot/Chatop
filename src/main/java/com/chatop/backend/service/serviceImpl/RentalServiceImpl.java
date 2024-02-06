@@ -34,8 +34,8 @@ public class RentalServiceImpl implements RentalService {
 
         Rental rental = modelMapper.map(rentalRequestDTO, Rental.class);
         rental.setOwner(owner);
-        rental.setCreatedAt(new Date());
-        rental.setUpdatedAt(new Date());
+        rental.setCreated_at(new Date());
+        rental.setUpdated_at(new Date());
 
         Rental savedRental = rentalRepository.save(rental);
         return modelMapper.map(savedRental, RentalDto.class);
@@ -63,7 +63,7 @@ public class RentalServiceImpl implements RentalService {
                 .orElseThrow(() -> new NoSuchElementException("Rental not found with id: " + id));
 
         modelMapper.map(rentalRequestDTO, rental);
-        rental.setUpdatedAt(new Date());
+        rental.setUpdated_at(new Date());
         Rental updatedRental = rentalRepository.save(rental);
 
         return modelMapper.map(updatedRental, RentalDto.class);

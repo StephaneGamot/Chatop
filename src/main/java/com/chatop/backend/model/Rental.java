@@ -40,19 +40,19 @@ public class Rental {
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private Date created_at;
 
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    private Date updated_at;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = new Date();
+        created_at = new Date();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = new Date();
+        updated_at = new Date();
     }
 }

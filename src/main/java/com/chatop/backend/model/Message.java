@@ -23,11 +23,11 @@ public class Message {
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    private Date created_at;
 
     @Column(name = "updated_at")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedAt;
+    private Date updated_at;
 
     @ManyToOne                                                 // Indique une relation plusieurs-à-un avec la table USERS.
     @JoinColumn(name = "user_id") // Définit la colonne de jointure et la référence. car nous avons une FOREIGN KEY

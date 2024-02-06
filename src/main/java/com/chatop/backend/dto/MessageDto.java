@@ -11,8 +11,8 @@ import java.util.Date;
 public class MessageDto {
     private Long id;
     private String message;
-    private Date createdAt;
-    private Date updatedAt;
+    private Date created_at;
+    private Date updated_at;
     private Long user_id;
     private Long rental_id;
 }
