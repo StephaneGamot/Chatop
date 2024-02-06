@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public interface UserService {
     UserDto registerUser(AuthRegisterDto authRegisterDto) throws IOException;
-    UserDto findUserById(Long id) throws IOException;
+    UserDto findUserById(Long id);
     List<UserDto> findAllUsers() throws IOException;
     Optional<User> findUserByEmail(String email) throws IOException;
     // Mettez à jour cette méthode pour accepter Authentication
