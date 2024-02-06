@@ -2,10 +2,12 @@ package com.chatop.backend.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+
 import java.util.Date;
+import java.util.Set;
 
 @Entity                // est une annotation qui indique que la classe correspond à une table de la base de données.
 @Table(name = "USERS") // indique le nom de la table associée.
@@ -48,4 +50,7 @@ public class User {
     protected void onUpdate() {
         updatedAt = new Date();
     }
+
+    @OneToMany(mappedBy = "ownerId")
+    private Set<Rental> rentals;
 }

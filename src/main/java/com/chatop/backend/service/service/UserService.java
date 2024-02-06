@@ -6,15 +6,19 @@ import com.chatop.backend.dto.AuthRegisterDto;
 import com.chatop.backend.dto.UserDto;
 import com.chatop.backend.model.User;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    UserDto registerUser(AuthRegisterDto registerDto);
-    UserDto findUserById(Long id);
-    List<UserDto> findAllUsers();
-    Optional<User> findByEmail(String email);
-    UserDto getCurrentUser();
-    AuthResponseDto login(AuthLoginDto loginDto);
+    UserDto registerUser(AuthRegisterDto authRegisterDto) throws IOException;
+    UserDto findUserById(Long id) throws IOException;
+    List<UserDto> findAllUsers() throws IOException;
+    Optional<User> findUserByEmail(String email) throws IOException;
+    // Mettez à jour cette méthode pour accepter Authentication
+    UserDto getCurrentUser(Authentication authentication) throws IOException;
+    AuthResponseDto loginUser(AuthLoginDto authLoginDto) throws IOException;
 }
+

@@ -21,7 +21,6 @@ public class Rental {
     private Long id;
 
     @Column(name = "name", length = 255)                   //  Champ mappé à la colonne "name" avec une longueur maximale de 255 caractères
-    @NotNull(message = "ne peut pas être null")
     private String name;
 
     @Column(name = "surface")
