@@ -18,7 +18,6 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/api/rentals")
 public class RentalController {
-
     private final RentalService rentalService;
 
     public RentalController(RentalService rentalService) {
@@ -26,10 +25,10 @@ public class RentalController {
     }
 
     @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> createRental(@ModelAttribute RentalRequestDto rentalRequestDTO, Principal principal) {
+    public ResponseEntity<Object> createRental(@ModelAttribute RentalRequestDto rentalRequestDto, Principal principal) {
         try {
-            RentalDto createdRental = rentalService.createRental(rentalRequestDTO, principal);
-            return new ResponseEntity<>(createdRental, HttpStatus.CREATED);
+            rentalService.createRental(rentalRequestDto, principal);
+            return new ResponseEntity<>(Collections.singletonMap("message", "Rental created !"), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(Collections.singletonMap("error", "Error while creating rental: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }

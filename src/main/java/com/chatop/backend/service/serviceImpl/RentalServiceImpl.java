@@ -9,14 +9,24 @@ import com.chatop.backend.repository.UserRepository;
 import com.chatop.backend.service.service.RentalService;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class RentalServiceImpl implements RentalService {
+    @Value("http://localhost:4200")
+    private String serverUrl;
+
     private final RentalRepository rentalRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
@@ -27,18 +37,43 @@ public class RentalServiceImpl implements RentalService {
         this.modelMapper = modelMapper;
     }
 
-    @Override
-    public RentalDto createRental(RentalRequestDto rentalRequestDTO, Principal principal) {
-        User owner = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new NoSuchElementException("User not found with email: " + principal.getName()));
+    public void createRental(RentalRequestDto rentalRequestDto, Principal principal) {
+        try {
+            String email = principal.getName();
+            User owner = userRepository.findAll().stream()
+                    .filter(user -> user.getEmail().equals(email))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException("User not found with email : " + email));
+            rentalRequestDto.setOwner_id(owner.getId());
 
-        Rental rental = modelMapper.map(rentalRequestDTO, Rental.class);
-        rental.setOwner(owner);
-        rental.setCreated_at(new Date());
-        rental.setUpdated_at(new Date());
+            // Save the image file
+            MultipartFile picture = rentalRequestDto.getPicture();
+            String fileName = StringUtils.cleanPath(Objects.requireNonNull(picture.getOriginalFilename()));
+            Path path = Paths.get("src/main/resources/static/images/" + fileName);
+            Files.copy(picture.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
-        Rental savedRental = rentalRepository.save(rental);
-        return modelMapper.map(savedRental, RentalDto.class);
+            String imageUrl = serverUrl + "/" + fileName;
+
+            // Create a RentalDTO from the RentalRequestDTO
+            RentalDto rentalDto = new RentalDto();
+            rentalDto.setId(rentalRequestDto.getId());
+            rentalDto.setName(rentalRequestDto.getName());
+            rentalDto.setSurface(rentalRequestDto.getSurface());
+            rentalDto.setPrice(rentalRequestDto.getPrice());
+            rentalDto.setPicture(imageUrl); // Set the image URL
+            rentalDto.setDescription(rentalRequestDto.getDescription());
+            rentalDto.setOwner_id(owner.getId());
+
+            Rental rental = modelMapper.map(rentalDto, Rental.class);
+            rental.setOwner(owner);
+            rental.setPicture(rentalDto.getPicture());
+            Rental savedRental = rentalRepository.save(rental);
+            RentalDto savedRentalDto = modelMapper.map(savedRental, RentalDto.class);
+            savedRentalDto.setOwner_id(savedRental.getOwner().getId());
+            savedRentalDto.setId(savedRental.getId()); // Set the id in the RentalDTO
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating rental: " + e.getMessage());
+        }
     }
 
     @Override

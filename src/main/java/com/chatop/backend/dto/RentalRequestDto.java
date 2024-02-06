@@ -12,5 +12,5 @@ public class RentalRequestDto {
     private Integer price;
     private MultipartFile picture;
     private String description;
-    private Long ownerId;
+    private Long owner_id;
 }

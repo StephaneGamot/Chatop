@@ -35,7 +35,7 @@ public class Rental {
     private String description;
 
     @ManyToOne                               // Indique une relation plusieurs-à-un avec la table USERS. c'est le FOREIGN KEY
-    @JoinColumn(name = "owner_id") // Définit la colonne de jointure. //, referencedColumnName = "id", nullable = false
+    @JoinColumn(name = "owner_id", referencedColumnName = "id") // Définit la colonne de jointure. //, referencedColumnName = "id", nullable = false
     private User owner;
 
     @Column(name = "created_at")
