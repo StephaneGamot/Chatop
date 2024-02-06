@@ -2,7 +2,6 @@ package com.chatop.backend.model;
 
 // Importation des classes nécessaires de la bibliothèque JPA et Lombok.
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;                    // Lombok @Data génère des getters et setters automatiquement.
 import lombok.NoArgsConstructor;       // @NoArgsConstructor génère un constructeur sans argument
 import lombok.AllArgsConstructor;      // @AllArgsConstructor génère un constructeur avec tous les arguments.
@@ -37,7 +36,7 @@ public class Rental {
 
     @ManyToOne                               // Indique une relation plusieurs-à-un avec la table USERS. c'est le FOREIGN KEY
     @JoinColumn(name = "owner_id") // Définit la colonne de jointure. //, referencedColumnName = "id", nullable = false
-    private User ownerId;                    // owner Id est un objet de User
+    private User owner;
 
     @Column(name = "created_at")
     @Temporal(TemporalType.TIMESTAMP)

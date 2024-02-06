@@ -5,6 +5,6 @@ import com.chatop.backend.dto.MessageDto;
 import java.io.IOException;
 
 public interface MessageService {
-    MessageDto createMessage(Long rentalId, Long userId, String message)throws IOException;
-
+    void saveMessage(MessageDto messageDto);
 }
+

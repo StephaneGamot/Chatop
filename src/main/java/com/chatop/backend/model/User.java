@@ -51,6 +51,6 @@ public class User {
         updatedAt = new Date();
     }
 
-    @OneToMany(mappedBy = "ownerId")
+    @OneToMany(mappedBy = "owner")
     private Set<Rental> rentals;
 }
