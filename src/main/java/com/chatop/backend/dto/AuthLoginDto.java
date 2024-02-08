@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthLoginDto {
+    @NotBlank(message = "L'email ne peut pas être vide")
+    @Email(message = "Format d'email invalide")
     private String email;
+
+    @NotBlank(message = "Le mot de passe ne peut pas être vide")
     private String password;
 }

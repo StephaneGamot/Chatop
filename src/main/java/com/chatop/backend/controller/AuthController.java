@@ -1,27 +1,25 @@
 package com.chatop.backend.controller;
 
-
 import com.chatop.backend.dto.AuthLoginDto;
 import com.chatop.backend.dto.AuthRegisterDto;
 import com.chatop.backend.dto.AuthResponseDto;
 import com.chatop.backend.dto.UserDto;
-import com.chatop.backend.model.User;
 import com.chatop.backend.security.JwtService;
-import com.chatop.backend.security.*;
 import com.chatop.backend.service.service.UserService;
-import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Optional;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,13 +35,21 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody AuthRegisterDto authRegisterDto) throws IOException {
-        userService.registerUser(authRegisterDto);
-        AuthLoginDto authLoginDto = new AuthLoginDto(authRegisterDto.getEmail(), authRegisterDto.getPassword());
-        AuthResponseDto authenticationResponse = userService.loginUser(authLoginDto);
-        return ResponseEntity.ok(Collections.singletonMap("token", authenticationResponse.getToken()));
-    }
+    public ResponseEntity<?> registerUser(@Valid @RequestBody AuthRegisterDto authRegisterDto) {
+        try {
+            UserDto registeredUser = userService.registerUser(authRegisterDto);
+            // Création d'un token pour l'utilisateur nouvellement enregistré directement
+            String token = jwtService.generateToken(new UsernamePasswordAuthenticationToken(
+                    registeredUser.getEmail(), null, Collections.emptyList())); // Ajustez selon votre implémentation de JwtService
 
+            // On retourne la réponse avec le token
+            return ResponseEntity.ok(Collections.singletonMap("token", token));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body("Error during registration: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred during registration.");
+        }
+    }
 
 
     @PostMapping("/login")
@@ -52,22 +58,29 @@ public class AuthController {
             AuthResponseDto authenticationResponse = userService.loginUser(authLoginDto);
             return ResponseEntity.ok(Collections.singletonMap("token", authenticationResponse.getToken()));
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials.");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error during login: " + e.getMessage());
         }
     }
+
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        // Si l'authentification n'est pas présente, renvoie un 401
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: Authentication is required.");
+        }
         try {
             UserDto userDto = userService.getCurrentUser(authentication);
+            // Si l'utilisateur est trouvé, il renvoie un 200 avec les données de l'utilisateur
             return ResponseEntity.ok(userDto);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while fetching the current user.");
+        } catch (UsernameNotFoundException e) {
+            // Si l'utilisateur n'est pas trouvé, renvoie un 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not Found: User not found.");
+        } catch (Exception e) {
+            // Pour tout autre type d'erreur, on renvoie un 500
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         }
     }
-
-
-
 }

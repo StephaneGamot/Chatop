@@ -24,7 +24,7 @@ public class RentalController {
         this.rentalService = rentalService;
     }
 
-    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "")
     public ResponseEntity<Object> createRental(@ModelAttribute RentalRequestDto rentalRequestDto, Principal principal) {
         try {
             rentalService.createRental(rentalRequestDto, principal);
