@@ -99,22 +99,45 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public List<RentalDto> getAllRentals() {
         List<Rental> rentals = rentalRepository.findAll();
-        return rentals.stream()
-                .map(rental -> modelMapper.map(rental, RentalDto.class))
-                .collect(Collectors.toList());
+        return rentals.stream().map(rental -> {
+            RentalDto rentalDto = modelMapper.map(rental, RentalDto.class);
+            if (rental.getOwner() != null) {
+                rentalDto.setOwner_id(rental.getOwner().getId());
+            }
+            return rentalDto;
+        }).collect(Collectors.toList());
     }
+
 
     @Override
-    public RentalDto updateRental(Long id, RentalRequestDto rentalDto) {
-        Rental rental = rentalRepository.findById(id)
+    public RentalDto updateRental(Long id, RentalRequestDto rentalRequestDto) {
+        Rental existingRental = rentalRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Rental not found with id: " + id));
 
-        modelMapper.map(rentalDto, rental);
-        rental.setUpdated_at(new Date());
-        Rental updatedRental = rentalRepository.save(rental);
+        // Conserve l'URL de l'image existante avant le mappage
+        String existingImageUrl = existingRental.getPicture();
 
-        return modelMapper.map(updatedRental, RentalDto.class);
+        // Mappe les propriétés à partir de rentalRequestDto vers existingRental,
+        // sans toucher au champ de l'image.
+        modelMapper.map(rentalRequestDto, existingRental);
+
+        // Réaffecte l'URL de l'image existante après le mappage
+        // pour s'assurer qu'elle n'est pas modifiée ou perdue.
+        existingRental.setPicture(existingImageUrl);
+
+        existingRental.setUpdated_at(new Date());
+        Rental updatedRental = rentalRepository.save(existingRental);
+
+        // Assurez-vous que le RentalDto retourné contient également l'URL de l'image.
+        RentalDto rentalDto = modelMapper.map(updatedRental, RentalDto.class);
+        rentalDto.setPicture(existingImageUrl); // Assurez-vous que l'URL de l'image est correctement définie dans le DTO
+
+        return rentalDto;
     }
+
+
+
+
 
     @Override
     public void deleteRental(Long id) {
