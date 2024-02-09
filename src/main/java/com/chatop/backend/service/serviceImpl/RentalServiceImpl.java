@@ -135,10 +135,6 @@ public class RentalServiceImpl implements RentalService {
         return rentalDto;
     }
 
-
-
-
-
     @Override
     public void deleteRental(Long id) {
         rentalRepository.deleteById(id);

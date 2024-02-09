@@ -15,6 +15,13 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/images/**").addResourceLocations("file:" + uploadDir + "/");
+        // Handler for images
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:" + uploadDir + "/");
+
+        // Handler for Swagger UI
+        registry.addResourceHandler("/swagger-ui/**")
+                .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
+                .resourceChain(false);
     }
 }
