@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Optional;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -59,12 +62,14 @@ public class UserServiceImpl implements UserService {
         return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getCreated_at(), user.getUpdated_at());
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     /* Enregistre un nouvel utilisateur, vérifie si l’email existe déjà, encode son mot de passe …
      * puis enregistre sur BDD et retourne UserDto avec les informations de l'utilisateur enregistré.
      */
     @Override
     public UserDto registerUser(AuthRegisterDto registerDto) throws IOException {
+        logger.info("Attempting to register user with email: {}", registerDto.getEmail());
         if (userRepository.findByEmail(registerDto.getEmail()).isPresent()) {
             throw new IOException("Email already exists.");
         }

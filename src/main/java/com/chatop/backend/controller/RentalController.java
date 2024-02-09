@@ -10,10 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/rentals")
@@ -34,6 +31,7 @@ public class RentalController {
         }
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<RentalDto> getRental(@PathVariable("id") final Long id) {
         try {
@@ -45,15 +43,18 @@ public class RentalController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<RentalDto>> getRentals() {
+    public ResponseEntity<Map<String, Object>> getAllRentals() {
         List<RentalDto> rentals = rentalService.getAllRentals();
-        return ResponseEntity.ok(rentals);
+        Map<String, Object> response = new HashMap<>();
+        response.put("rentals", rentals);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> updateRental(@PathVariable("id") Long id, @ModelAttribute RentalRequestDto rentalRequestDTO) {
+    public ResponseEntity<?> updateRental(@PathVariable("id") Long id, @ModelAttribute RentalRequestDto rentalRequestDto) {
         try {
-            RentalDto updatedRental = rentalService.updateRental(id, rentalRequestDTO);
+            RentalDto updatedRental = rentalService.updateRental(id, rentalRequestDto);
             return ResponseEntity.ok(updatedRental);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
@@ -71,5 +72,5 @@ public class RentalController {
         } catch (Exception e) {
             return new ResponseEntity<>(Collections.singletonMap("error", "Error while deleting rental: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-}
+    }}
+

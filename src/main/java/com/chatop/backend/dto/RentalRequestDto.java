@@ -26,4 +26,6 @@ public class RentalRequestDto {
 
     @NotNull(message = "L'identifiant du propriétaire ne peut pas être null")
     private Long owner_id;
+
+    private String pictureUrl;
 }
