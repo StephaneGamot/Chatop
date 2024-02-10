@@ -15,6 +15,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -35,12 +43,27 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User registered successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class),
+                                    examples = {
+                                            @ExampleObject(name="SuccessResponse", value="{\"token\": \"your_generated_token_here\"}")
+                                    })),
+                    @ApiResponse(responseCode = "400", description = "Bad Request",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class),
+                                    examples = {
+                                            @ExampleObject(name="ErrorResponse", value="{\"error\": \"Error message\"}")
+                                    }))
+            })
     public ResponseEntity<?> registerUser(@Valid @RequestBody AuthRegisterDto authRegisterDto) {
         try {
             UserDto registeredUser = userService.registerUser(authRegisterDto);
-            // Création d'un token pour l'utilisateur nouvellement enregistré directement
+            // Création d'un token pour le nouvel l'utilisateur via JwtService
             String token = jwtService.generateToken(new UsernamePasswordAuthenticationToken(
-                    registeredUser.getEmail(), null, Collections.emptyList())); // Ajustez selon votre implémentation de JwtService
+                    registeredUser.getEmail(), null, Collections.emptyList()));
 
             // On retourne la réponse avec le token
             return ResponseEntity.ok(Collections.singletonMap("token", token));
@@ -53,6 +76,21 @@ public class AuthController {
 
 
     @PostMapping("/login")
+    @Operation(summary = "Log in a user and return a JWT token",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "User logged in successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class),
+                                    examples = {
+                                            @ExampleObject(name="SuccessResponse", value="{\"token\": \"your_generated_token_here\"}")
+                                    })),
+                    @ApiResponse(responseCode = "401", description = "Invalid credentials or login error",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class),
+                                    examples = {
+                                            @ExampleObject(name="ErrorResponse", value="{\"error\": \"Invalid credentials.\"}")
+                                    }))
+            })
     public ResponseEntity<?> loginUser(@Valid @RequestBody AuthLoginDto authLoginDto) {
         try {
             AuthResponseDto authenticationResponse = userService.loginUser(authLoginDto);
@@ -66,6 +104,30 @@ public class AuthController {
 
 
     @GetMapping("/me")
+    @Operation(summary = "Get the current authenticated user's information",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Authenticated user's information returned successfully",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = UserDto.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication is required",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class),
+                                    examples = {
+                                            @ExampleObject(name="UnauthorizedResponse", value="{\"error\": \"Unauthorized: Authentication is required.\"}")
+                                    })),
+                    @ApiResponse(responseCode = "404", description = "Not Found: User not found",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class),
+                                    examples = {
+                                            @ExampleObject(name="NotFoundResponse", value="{\"error\": \"Not Found: User not found.\"}")
+                                    })),
+                    @ApiResponse(responseCode = "500", description = "An unexpected error occurred",
+                            content = @Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = String.class),
+                                    examples = {
+                                            @ExampleObject(name="ErrorResponse", value="{\"error\": \"An unexpected error occurred.\"}")
+                                    }))
+            })
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         // Si l'authentification n'est pas présente, renvoie un 401
         if (authentication == null || !authentication.isAuthenticated()) {
