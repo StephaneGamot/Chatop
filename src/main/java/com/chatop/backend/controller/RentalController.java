@@ -28,6 +28,7 @@ public class RentalController {
         this.rentalService = rentalService;
     }
 
+    // Créer une location
     @PostMapping(value = "")
     @Operation(summary = "Create a new rental",
             responses = {
@@ -48,7 +49,7 @@ public class RentalController {
         }
     }
 
-
+    // Retrouver une location par son Id
     @GetMapping("/{id}")
     @Operation(summary = "Get a rental by ID",
             responses = {
@@ -72,6 +73,7 @@ public class RentalController {
         }
     }
 
+    // Permet de voir toutes les locations
     @GetMapping("")
     @Operation(summary = "Get all rentals",
             responses = {
@@ -89,7 +91,7 @@ public class RentalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-
+    // Pour effectuer un changement dans la location
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Update a rental by ID",
             responses = {
@@ -114,7 +116,7 @@ public class RentalController {
         }
     }
 
-    // Si vous avez une méthode pour supprimer des locations, elle devrait ressembler à cela :
+    // Pour supprimer des locations
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a rental by ID",
             responses = {
