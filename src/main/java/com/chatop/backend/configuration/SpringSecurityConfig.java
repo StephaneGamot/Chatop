@@ -1,10 +1,10 @@
 package com.chatop.backend.configuration;
 
-import com.chatop.backend.service.serviceImpl.CustomUserDetailsService;
-import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -16,22 +16,27 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.web.cors.CorsConfigurationSource;
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfig {
 
-    @Autowired
-    private CorsConfigurationSource corsConfigurationSource;
-    private final String base64Secret = "XgGUtXAHKHa7+OltufhCDFuefOsYul2aNFl421tSSeg";
+    private final CorsConfigurationSource corsConfigurationSource;
+    private final String base64Secret;
 
+    // Injection des dépendances via le constructeur
+    public SpringSecurityConfig(CorsConfigurationSource corsConfigurationSource,
+                                @Value("${security.jwt.base64-secret}") String base64Secret) {
+        this.corsConfigurationSource = corsConfigurationSource;
+        this.base64Secret = base64Secret;
+    }
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource));
