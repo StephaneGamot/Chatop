@@ -18,22 +18,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-@Service
-public class MessageServiceImpl implements MessageService {
-    private final MessageRepository messageRepository;
-    private final UserRepository userRepository;
-    private final RentalRepository rentalRepository;
+    @Service
+    public class MessageServiceImpl implements MessageService {
+        private final MessageRepository messageRepository;
+        private final UserRepository userRepository;
+        private final RentalRepository rentalRepository;
+        private final ModelMapper modelMapper;
 
-    @Autowired
-    public MessageServiceImpl(MessageRepository messageRepository, UserRepository userRepository, RentalRepository rentalRepository) {
-        this.messageRepository = messageRepository;
-        this.userRepository = userRepository;
-        this.rentalRepository = rentalRepository;
-    }
-
-    @Autowired
-    private ModelMapper modelMapper;
-
+        // Injection de toutes les dépendances via le constructeur
+        public MessageServiceImpl(MessageRepository messageRepository, UserRepository userRepository, RentalRepository rentalRepository, ModelMapper modelMapper) {
+            this.messageRepository = messageRepository;
+            this.userRepository = userRepository;
+            this.rentalRepository = rentalRepository;
+            this.modelMapper = modelMapper;
+        }
     @Override
     public void saveMessage(MessageDto messageDto) {
         // Recherche de l'utilisateur et de la location pour s'assurer qu'ils existent

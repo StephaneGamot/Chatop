@@ -84,7 +84,6 @@ public class UserServiceImpl implements UserService {
         return  modelMapper.map(savedUser, UserDto.class);
     }
 
-
     /*
     *  Authentifie un utilisateur en utilisant son email et son mot de passe.
     * Si l'authentification réussit, un token JWT est généré et retourné dans un objet AuthResponseDto
@@ -115,29 +114,6 @@ public class UserServiceImpl implements UserService {
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         return convertToUserDto(user);
     }
-
-
-    /*
-    * On récupère tous les utilisateurs de la base de données, les convertit en UserDto,
-    * et retourne une liste de ces objets DTO.
-    */
-    @Override
-    public List<UserDto> findAllUsers() {
-        return userRepository.findAll().stream()
-                .map(this::convertToUserDto)
-                .collect(Collectors.toList());
-    }
-
-
-    /*
-    *  On recherche un utilisateur par son email et retourne un Optional<User>.
-    * Optional est utilisé ici pour traiter le cas où l'utilisateur n'est pas trouvé
-    * */
-    @Override
-    public Optional<User> findUserByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
 
     /*
     * On récupère l'utilisateur actuellement authentifié en utilisant l'objet Authentication.
