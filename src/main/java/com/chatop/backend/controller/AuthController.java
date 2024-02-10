@@ -119,13 +119,7 @@ public class AuthController {
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = String.class),
                                     examples = {
-                                            @ExampleObject(name="NotFoundResponse", value="{\"error\": \"Not Found: User not found.\"}")
-                                    })),
-                    @ApiResponse(responseCode = "500", description = "An unexpected error occurred",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = String.class),
-                                    examples = {
-                                            @ExampleObject(name="ErrorResponse", value="{\"error\": \"An unexpected error occurred.\"}")
+                                            @ExampleObject(name="NotFoundResponse", value="{\"error\": \"User not found.\"}")
                                     }))
             })
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
