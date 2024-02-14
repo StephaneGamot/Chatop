@@ -33,7 +33,7 @@ public class SpringSecurityConfig {
 
     // Injection des dépendances via le constructeur
     public SpringSecurityConfig(CorsConfigurationSource corsConfigurationSource,
-                                @Value("${security.jwt.base64-secret}") String base64Secret) {
+                                @Value("${JWT_SECRET}") String base64Secret) {
         this.corsConfigurationSource = corsConfigurationSource;
         this.base64Secret = base64Secret;
     }
