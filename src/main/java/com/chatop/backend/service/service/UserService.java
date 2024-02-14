@@ -19,6 +19,6 @@ public interface UserService {
     Optional<User> findUserByEmail(String email) throws IOException;   */
     // Mettez à jour cette méthode pour accepter Authentication
     UserDto getCurrentUser(Authentication authentication) throws IOException;
-    AuthResponseDto loginUser(AuthLoginDto authLoginDto) throws IOException;
+    AuthResponseDto loginUser(AuthLoginDto authLoginDto) ;
 }
 

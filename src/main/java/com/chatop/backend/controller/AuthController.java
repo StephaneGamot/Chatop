@@ -1,9 +1,6 @@
 package com.chatop.backend.controller;
 
-import com.chatop.backend.dto.AuthLoginDto;
-import com.chatop.backend.dto.AuthRegisterDto;
-import com.chatop.backend.dto.AuthResponseDto;
-import com.chatop.backend.dto.UserDto;
+import com.chatop.backend.dto.*;
 import com.chatop.backend.security.JwtService;
 import com.chatop.backend.service.service.UserService;
 
@@ -14,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,7 +56,10 @@ public class AuthController {
                                             @ExampleObject(name="ErrorResponse", value="{\"error\": \"Error message\"}")
                                     }))
             })
-    public ResponseEntity<?> registerUser(@Valid @RequestBody AuthRegisterDto authRegisterDto) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody AuthRegisterDto authRegisterDto, Errors errors) {
+        if (errors.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDto("error"));
+        }
         try {
             UserDto registeredUser = userService.registerUser(authRegisterDto);
             // Création d'un token pour le nouvel l'utilisateur via JwtService
@@ -91,14 +92,15 @@ public class AuthController {
                                             @ExampleObject(name="ErrorResponse", value="{\"error\": \"Invalid credentials.\"}")
                                     }))
             })
-    public ResponseEntity<?> loginUser(@Valid @RequestBody AuthLoginDto authLoginDto) {
+    public ResponseEntity<?> loginUser(@Valid @RequestBody AuthLoginDto authLoginDto, Errors errors) {
+       if (errors.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDto("error"));
+        }
         try {
             AuthResponseDto authenticationResponse = userService.loginUser(authLoginDto);
-            return ResponseEntity.ok(Collections.singletonMap("token", authenticationResponse.getToken()));
+            return ResponseEntity.ok(authenticationResponse);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials.");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Error during login: " + e.getMessage());
         }
     }
 
@@ -124,7 +126,7 @@ public class AuthController {
             })
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
         // Si l'authentification n'est pas présente, renvoie un 401
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (!authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: Authentication is required.");
         }
         try {
