@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,7 +59,7 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    @Operation(summary = "Log in a user and return a JWT token", responses = {@ApiResponse(responseCode = "200", description = "User logged in successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class), examples = {@ExampleObject(name = "SuccessResponse", value = "{\"token\": \"your_generated_token_here\"}")})), @ApiResponse(responseCode = "401", description = "Invalid credentials or login error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class), examples = {@ExampleObject(name = "ErrorResponse", value = "{\"error\": \"Invalid credentials.\"}")}))})
+    @Operation(summary = "Log in a user and return a JWT token", responses = {@ApiResponse(responseCode = "200", description = "User logged in successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthResponseDto.class), examples = {@ExampleObject(name = "SuccessResponse", value = "{\"token\": \"your_generated_token_here\"}")})), @ApiResponse(responseCode = "401", description = "Invalid credentials or login error", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class), examples = {@ExampleObject(name = "ErrorResponse", value = "{\"error\": \"Invalid credentials.\"}")}))})
     public ResponseEntity<?> loginUser(@Valid @RequestBody AuthLoginDto authLoginDto, Errors errors) {
         if (errors.hasErrors()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDto("error"));
@@ -75,7 +76,9 @@ public class AuthController {
 
 
     @GetMapping("/me")
-    @Operation(summary = "Get the current authenticated user's information", responses = {@ApiResponse(responseCode = "200", description = "Authenticated user's information returned successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))), @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication is required", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class), examples = {@ExampleObject(name = "UnauthorizedResponse", value = "{\"error\": \"Unauthorized: Authentication is required.\"}")})), @ApiResponse(responseCode = "404", description = "Not Found: User not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class), examples = {@ExampleObject(name = "NotFoundResponse", value = "{\"error\": \"User not found.\"}")}))})
+    @Operation(summary = "Get the current authenticated user's information",    security = @SecurityRequirement(name = "bearerAuth"), responses = {@ApiResponse(responseCode = "200", description = "Authenticated user's information returned successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized: Authentication is required", content = @Content(mediaType = "application/json", examples = {@ExampleObject(name = "UnauthorizedResponse", value = "{\"error\": \"Unauthorized: Authentication is required.\"}")})),
+            @ApiResponse(responseCode = "404", description = "Not Found: User not found", content = @Content(mediaType = "application/json", examples = {@ExampleObject(name = "NotFoundResponse", value = "{\"error\": \"User not found.\"}")}))})
     public ResponseEntity<?> getCurrentUser(Authentication authentication) {
 
         if (!authentication.isAuthenticated()) {                // Vérifie si l'utilisateur est authentifié.

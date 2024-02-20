@@ -41,7 +41,12 @@ public class SpringSecurityConfig {
         http.csrf(csrf -> csrf.disable())                                                                      // Désactivation de la protection CSRF
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Définit la politique de création de session à 'STATELESS' pour ne pas conserver d'état côté serveur.
                 .authorizeHttpRequests(auth -> auth                                                            // Configuration des autorisations de requêtes : quelles requêtes sont autorisées ou nécessitent une authentification.
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/swagger-ui/**", "/v3/api-docs/**", "/images/**").permitAll()   // Permettre à tout le monde d'accéder aux endpoints
+                        .requestMatchers("/api/auth/register",
+                                "/api/auth/login",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/images/**").permitAll()   // Permettre à tout le monde d'accéder aux endpoints
                         .anyRequest().authenticated());                                                        // Toutes les autres requêtes doivent être authentifiées.
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())));                     // Configuration pour utiliser les tokens JWT comme moyen d'authentification OAuth2.
         return http.build();
