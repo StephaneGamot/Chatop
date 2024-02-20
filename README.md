@@ -55,3 +55,5 @@ Launch the application by executing: mvn spring-boot:run
 
 ## Author
 Developed with 💻 and ❤ by Stéphane Gamot
+
+
