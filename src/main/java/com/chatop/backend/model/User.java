@@ -33,24 +33,28 @@ public class User {
     @NotNull(message = "Mot de passe ne peut pas être null")
     private String password;
 
-    @Column(name = "created_at")            // L'attribut name dans l'annotation @Column spécifie explicitement le nom de la colonne dans la BDE.
+    @Column(name = "created_at")
+    // L'attribut name dans l'annotation @Column spécifie explicitement le nom de la colonne dans la BDE.
     @Temporal(TemporalType.TIMESTAMP)       //  TIMESTAMP signifie qu'il enregistre la date et l'heure.
     private Date created_at;                 // le champ Java createdAt doit être mappé à la colonne nommée created_at dans la table de base de données. On se doit de respecter ici le CamelCase
 
     @Column(name = "updated_at")
-    @Temporal(TemporalType.TIMESTAMP)       // Spécifie le type de la colonne dans la base de données pour stocker les dates
+    @Temporal(TemporalType.TIMESTAMP)
+    // Spécifie le type de la colonne dans la base de données pour stocker les dates
     private Date updated_at;
 
-    @PrePersist                              // Il est appelé juste avant qu'un nouvel utilisateur soit créé, pour enregistrer la date et l'heure de création.
+    @OneToMany(mappedBy = "owner")
+    private Set<Rental> rentals;
+
+    @PrePersist
+    // Il est appelé juste avant qu'un nouvel utilisateur soit créé, pour enregistrer la date et l'heure de création.
     protected void onCreate() {
         created_at = new Date();
     }
 
-    @PreUpdate                               // Il est appelé juste avant qu'un utilisateur existant soit mis à jour, pour enregistrer la nouvelle date et l'heure de la mise à jour.
+    @PreUpdate
+    // Il est appelé juste avant qu'un utilisateur existant soit mis à jour, pour enregistrer la nouvelle date et l'heure de la mise à jour.
     protected void onUpdate() {
         updated_at = new Date();
     }
-
-    @OneToMany(mappedBy = "owner")
-    private Set<Rental> rentals;
 }

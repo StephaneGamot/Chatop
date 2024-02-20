@@ -29,11 +29,11 @@ public class Message {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated_at;
 
-    @ManyToOne                                                 // Indique une relation plusieurs-à-un avec la table USERS.
-    @JoinColumn(name = "user_id") // Définit la colonne de jointure et la référence. car nous avons une FOREIGN KEY
+    @ManyToOne                        // Indique une relation plusieurs-à-un avec la table USERS.
+    @JoinColumn(name = "user_id")     // Définit la colonne de jointure et la référence. car nous avons une FOREIGN KEY
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "rental_id") // Définit la colonne de jointure et la référence. //, referencedColumnName = "id"
+    @JoinColumn(name = "rental_id")   // Définit la colonne de jointure et la référence. //, referencedColumnName = "id"
     private Rental rental;
 }
